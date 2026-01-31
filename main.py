@@ -1,8 +1,6 @@
 from json2schema.core.pipeline import Converter
-from json2schema.core.comparators import TypeComparator, FormatComparator, RequiredComparator
-import json
+from json2schema.core.comparators import TypeComparator, FormatComparator, RequiredComparator, FlagMaker, EmptyComparator
 import time
-from pprint import pprint
 
 cur = time.time()
 
@@ -12,6 +10,7 @@ conv.add_json([{"name": "fdfddfm"}])
 conv.add_json(["fdfddfm"])
 conv.add_json({"name": "fdfddfm"})
 conv.add_json([{"name": "https://dddd.ru"}])
+conv.add_json([{"empty": {}}]) #
 conv.add_json({"name": "https://dddd.ru"})
 conv.add_json({
     "name": "alice@example.com",
@@ -22,5 +21,12 @@ conv.add_json({
 conv.register(TypeComparator())
 conv.register(FormatComparator())
 conv.register(RequiredComparator())
-pprint(conv.run())
-print(f"Затраченное время: {round(time.time()-cur, 4)}")
+conv.register(FlagMaker())
+conv.register(EmptyComparator())
+
+result = conv.run()
+result_time = time.time()
+
+from rich.pretty import pprint
+pprint(result)
+print(f"Затраченное время: {round(result_time-cur, 4)}")
