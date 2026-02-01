@@ -1,6 +1,8 @@
 import re
+from functools import lru_cache
 from typing import Optional, Any, Dict, List
 from .template import Comparator, ProcessingContext
+from collections import defaultdict
 
 class FormatDetector:
     """Глобальный детектор форматов. Расширяем — просто добавляем в _registry."""
@@ -24,6 +26,7 @@ class FormatDetector:
     }
 
     @classmethod
+    @lru_cache(maxsize=512)
     def detect(cls, value: Any, type_hint: str = "string") -> Optional[str]:
         patterns = cls._registry.get(type_hint, {})
         for pattern, name in patterns.items():
@@ -35,68 +38,57 @@ class FormatComparator(Comparator):
     name = "format"
 
     def can_process(self, ctx: ProcessingContext, env: str, prev_result: Dict) -> bool:
-        # Форматы только если есть string (в том числе в anyOf/oneOf/allOf)
-        def has_string_type(node):
-            if isinstance(node, dict):
-                if node.get("type") == "string":
-                    return True
-                for key in ["anyOf", "oneOf", "allOf"]:
-                    if key in node and any(has_string_type(child) for child in node[key]):
-                        return True
-            return False
-        return has_string_type(prev_result)
+        # Обрабатываем только если на текущем уровне уже есть type: "string"
+        return prev_result.get("type") == "string"
 
-    def process(self, ctx: ProcessingContext, env: str, prev_result: Dict):
-        # Рекурсивно обходим node, модифицируем все элементы type="string"
-        def apply_format(node: Dict) -> List[Dict]:
-            if "type" in node and node["type"] == "string":
-                base_triggers = set(node.get("j2sElementTrigger", []))
-                variants_map: Dict[Optional[str], set[int]] = {None: set(base_triggers)}
+    def process(
+        self,
+        ctx: ProcessingContext,
+        env: str,
+        prev_result: Dict
+    ) -> tuple[Optional[Dict], Optional[List[Dict]]]:
 
-                # Форматы из схем
-                for s in ctx.schemas:
-                    if isinstance(s.content, dict) and s.content.get("type") == "string":
-                        fmt = s.content.get("format")
-                        variants_map.setdefault(fmt, set()).add(s.id)
-                        if fmt is not None:
-                            variants_map[None].discard(s.id)
+        # Базовые триггеры из предыдущих компараторов (обычно из TypeComparator)
+        base_triggers = set(prev_result.get("j2sElementTrigger", []))
 
-                # Форматы из JSON
-                for j in ctx.jsons:
-                    if isinstance(j.content, str):
-                        fmt = FormatDetector.detect(j.content, type_hint="string")
-                        variants_map.setdefault(fmt, set()).add(j.id)
-                        if fmt is not None:
-                            variants_map[None].discard(j.id)
+        # Собираем все возможные форматы и их источники
+        format_to_ids = defaultdict(set)
+        format_to_ids[None].update(base_triggers)
 
-                # Формируем список вариантов
-                variants = []
-                for fmt, ids in variants_map.items():
-                    if not ids:
-                        continue
-                    var = {"type": "string", "j2sElementTrigger": sorted(ids)}
-                    if fmt is not None:
-                        var["format"] = fmt
-                    variants.append(var)
+        # 1. Форматы, явно указанные в схемах
+        for s in ctx.schemas:
+            if isinstance(s.content, dict) and s.content.get("type") == "string":
+                fmt = s.content.get("format")
+                format_to_ids[fmt].add(s.id)
+                if fmt is not None:
+                    format_to_ids[None].discard(s.id)
 
-                # Только один вариант → возвращаем его напрямую
-                if len(variants) == 1:
-                    return [variants[0]]
-                return variants
+        # 2. Форматы, выведенные из значений JSON
+        for j in ctx.jsons:
+            if isinstance(j.content, str):
+                fmt = FormatDetector.detect(j.content)
+                format_to_ids[fmt].add(j.id)
+                if fmt is not None:
+                    format_to_ids[None].discard(j.id)
 
-            # Рекурсивно обходим anyOf/oneOf/allOf
-            for key in ["anyOf", "oneOf", "allOf"]:
-                if key in node:
-                    new_list = []
-                    for child in node[key]:
-                        new_list.extend(apply_format(child))
-                    node[key] = new_list
-            return [node]
+        # Формируем варианты
+        variants: List[Dict] = []
+        for fmt, ids in format_to_ids.items():
+            if not ids:
+                continue
+            variant = {
+                "type": "string",
+                "j2sElementTrigger": sorted(ids)
+            }
+            if fmt is not None:
+                variant["format"] = fmt
+            variants.append(variant)
 
+        # Результат
+        if len(variants) == 1:
+            return variants[0], None
+        if len(variants) > 1:
+            return None, variants
 
-
-        updated_nodes = apply_format(dict(prev_result))
-        if len(updated_nodes) == 1:
-            return updated_nodes[0], None
-        else:
-            return None, updated_nodes
+        # Если ничего нового не нашли — оставляем как есть
+        return None, None

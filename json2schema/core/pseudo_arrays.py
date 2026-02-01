@@ -12,6 +12,6 @@ class PseudoArrayHandler(PseudoArrayHandlerBase):
             return False, None
         try:
             indices = [int(k) for k in keys]
-            return min(indices) == 0 and max(indices) == len(indices) - 1 and len(set(indices)) == len(indices), "^[0-9]+$"
+            return True, "^[0-9]+$"
         except ValueError:
             return False, None

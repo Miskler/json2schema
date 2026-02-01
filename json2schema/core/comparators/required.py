@@ -11,7 +11,7 @@ class RequiredComparator(Comparator):
 
     def can_process(self, ctx: ProcessingContext, env: str, node: dict) -> bool:
         # обрабатываем только объекты
-        return node.get("type") == "object" or node.get("type") is None or not ctx.jsons
+        return (node.get("type") == "object" and not node.get("isPseudoArray", False)) or node.get("type") is None or not ctx.jsons
 
     def process(self, ctx: ProcessingContext, env: str, node: dict):
         # собираем все ключи в JSON на этом уровне

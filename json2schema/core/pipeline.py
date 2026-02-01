@@ -1,20 +1,34 @@
-# pipeline.py
 from typing import Any, Dict, List, Optional, Literal
 from .comparators.template import Resource, Comparator, ProcessingContext, ToDelete
+from .comparators import TypeComparator
 from .pseudo_arrays import PseudoArrayHandlerBase
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 
 class Converter:
     def __init__(self,
                  pseudo_handler: Optional[PseudoArrayHandlerBase] = None,
-                 base_of: Literal["anyOf", "oneOf", "allOf"] = "anyOf"):
+                 base_of: Literal["anyOf", "oneOf", "allOf"] = "anyOf",
+                 core_comparator: Optional[TypeComparator] = None):
+        """
+        Конвертер JSON + JSON Schema структур в JSON Schema.
+
+        :param pseudo_handler: Обработчик псевдомассивов (большие словари с одинаковым паттерном значений, а ключами являются индефикаторы).
+        :type pseudo_handler: Optional[PseudoArrayHandlerBase]
+
+        :param base_of: Базовый оператор объединения схем. Логики определения конкретного типа Of индивидуально не предусмотрено.
+        :type base_of: Literal["anyOf", "oneOf", "allOf"]
+
+        :param core_comparator: Базовый компаратор типов. Он вынесен отдельно, так как type - единственное поле без которого Converter не может построить структуру.
+        :type core_comparator: TypeComparator
+        """
         self._schemas: List[Resource] = []
         self._jsons: List[Resource] = []
         self._comparators: List[Comparator] = []
+        self._core_comparator = core_comparator or TypeComparator()
         self._id = 0
         self._pseudo_handler = pseudo_handler
         self._base_of = base_of
@@ -28,6 +42,8 @@ class Converter:
         self._id += 1
 
     def register(self, c: Comparator):
+        if isinstance(c, TypeComparator):
+            raise UserWarning("TypeComparator-подобный компаратор задается при инициализации в атрибуте core_comparator!")
         self._comparators.append(c)
 
     # ---------------- utils ----------------
@@ -117,17 +133,35 @@ class Converter:
         logger.debug("Entering _run_level: env=%s, prev_result=%s", env, prev)
         node = dict(prev)
 
-        # вызываем компараторы на текущем узле
-        for comp in self._comparators:
+        def use_comp(comp) -> bool:
             if not comp.can_process(ctx, env, node):
-                continue
+                return False
 
             g, alts = comp.process(ctx, env, node)
             if g:
                 node.update(g)
             if alts:
                 node.setdefault(self._base_of, []).extend(alts)
+            return True
+
+        # Вызов базового компаратора
+        use_comp(self._core_comparator)
+
+        # Определение является ли объект псевдомассивом
+        if node.get("type") == "object":
+            props = self._collect_prop_names(ctx.schemas, ctx.jsons)
+            if self._pseudo_handler:
+                is_pseudo_array, pattern = self._pseudo_handler.is_pseudo_array(props, ctx)
+                node["isPseudoArray"] = True
+            else:
+                node["isPseudoArray"] = False
+                is_pseudo_array = False
+
+        # Вызов остальных компараторов
+        for comp in self._comparators:
+            use_comp(comp)
         
+        # Удаление атрибутов помеченных на удаление
         to_delete_keys = []
         for key, element in node.items():
             if isinstance(element, ToDelete):
@@ -149,12 +183,6 @@ class Converter:
 
         # recursion based on type
         if node.get("type") == "object":
-            props = self._collect_prop_names(ctx.schemas, ctx.jsons)
-            if self._pseudo_handler:
-                is_pseudo_array, pattern = self._pseudo_handler.is_pseudo_array(props, ctx)
-            else:
-                is_pseudo_array = False
-
             if is_pseudo_array:
                 node = self._run_pseudo_array(ctx, env, node, pattern)
             else:
@@ -188,7 +216,6 @@ class Converter:
 
     def _run_pseudo_array(self, ctx: ProcessingContext, env: str, node: Dict, pattern: str) -> Dict:
         node = dict(node)
-        node["additionalProperties"] = False
         node.setdefault("patternProperties", {})
         _, items_ctx = self._split_array_ctx(ctx)
         node["patternProperties"][pattern] = self._run_level(

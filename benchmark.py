@@ -4,10 +4,8 @@ from statistics import mean
 # ===== json2schema (твоя библиотека) =====
 from json2schema.core.pipeline import Converter
 from json2schema.core.comparators import (
-    TypeComparator,
     FormatComparator,
     RequiredComparator,
-    FlagMaker,
     EmptyComparator,
     DeleteElement,
 )
@@ -17,34 +15,17 @@ from genson import SchemaBuilder
 
 
 # ===== входные данные =====
-SCHEMA = {
-    "type": "object",
-    "properties": {
-        "name": {
-            "type": "object",
-            "properties": {
-                "name": {"type": "integer"}
-            }
-        }
-    }
-}
+SCHEMA = {}
+
+import json
+with open("ClassCatalog.tree.json", "r") as f:
+    jsn = json.loads(f.read())
 
 JSONS = [
-    [{"name": "fdfddfm"}],
-    ["fdfddfm"],
-    {"name": "fdfddfm"},
-    [{"name": "https://dddd.ru"}],
-    [{"empty": {}}],
-    {"name": "https://dddd.ru"},
-    {
-        "name": "alice@example.com",
-        "email": "alice@example.com",
-        "identifier": "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
-        "created": "2024-01-31"
-    }
+    jsn
 ]
 
-RUNS = 2000
+RUNS = 500
 
 
 # ===== json2schema прогон =====
@@ -55,7 +36,6 @@ def run_json2schema():
     for j in JSONS:
         conv.add_json(j)
 
-    conv.register(TypeComparator())
     conv.register(FormatComparator())
     conv.register(RequiredComparator())
     #conv.register(FlagMaker())
@@ -119,10 +99,10 @@ if __name__ == "__main__":
         ])
     )
 
-    prop.compare( # Function accepts both file path and schema dict itself // can be combined
-        old_schema=run_json2schema(),
-        new_schema=run_genson()
-    )
+    #prop.compare( # Function accepts both file path and schema dict itself // can be combined
+    #    old_schema=run_json2schema(),
+    #    new_schema=run_genson()
+    #)
 
     # Теперь можно вывести
-    prop.print(with_legend=False)
+    #prop.print(with_legend=False)
