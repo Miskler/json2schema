@@ -3,7 +3,8 @@ from .template import ProcessingContext, Comparator, Resource
 
 class EmptyComparator(Comparator):
     """
-    Добавляет minItems=0 или minProperties=0 для пустых массивов/объектов,
+    Добавляет maxItems=0 или maxProperties=0 для полностью пустых массивов/объектов,
+    а так же minItems=0 или minProperties=0 для полностью НЕ пустых массивов/объектов,
     если на данном уровне нет кандидатов из непустых схем или JSON.
     """
     name = "empty"

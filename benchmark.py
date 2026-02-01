@@ -25,7 +25,7 @@ JSONS = [
     jsn
 ]
 
-RUNS = 500
+RUNS = 5000
 
 
 # ===== json2schema прогон =====

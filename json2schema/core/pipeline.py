@@ -152,7 +152,7 @@ class Converter:
             props = self._collect_prop_names(ctx.schemas, ctx.jsons)
             if self._pseudo_handler:
                 is_pseudo_array, pattern = self._pseudo_handler.is_pseudo_array(props, ctx)
-                node["isPseudoArray"] = True
+                node["isPseudoArray"] = is_pseudo_array
             else:
                 node["isPseudoArray"] = False
                 is_pseudo_array = False
