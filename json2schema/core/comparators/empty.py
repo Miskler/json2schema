@@ -9,6 +9,10 @@ class EmptyComparator(Comparator):
     """
     name = "empty"
 
+    def __init__(self, flag_empty: bool = True, flag_non_empty: bool = True):
+        self.flag_empty = flag_empty
+        self.flag_non_empty = flag_non_empty
+
     def can_process(self, ctx: ProcessingContext, env: str, node: Dict) -> bool:
         t = node.get("type")
         return t == "object" or t == "array"
@@ -29,15 +33,15 @@ class EmptyComparator(Comparator):
                 return bool(c)  # не пустой список
             return True  # скаляры считаем непустыми
 
-        candidates = (is_nonempty(r) for r in ctx.schemas + ctx.jsons)
+        candidates = [is_nonempty(r) for r in ctx.schemas + ctx.jsons]
 
-        if not any(candidates):
+        if self.flag_empty and not any(candidates):
             t = node.get("type")
             if t == "object":
                 return {"maxProperties": 0}, None
             elif t == "array":
                 return {"maxItems": 0}, None
-        elif all(candidates):
+        elif self.flag_non_empty and all(candidates):
             t = node.get("type")
             if t == "object":
                 return {"minProperties": 1}, None

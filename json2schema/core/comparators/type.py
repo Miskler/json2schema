@@ -4,7 +4,7 @@ from .template import Comparator, ProcessingContext
 def infer_json_type(v):
     if v is None: return "null"
     if isinstance(v, bool): return "boolean"
-    if isinstance(v, int) and not isinstance(v, bool): return "integer"
+    if isinstance(v, int): return "integer"
     if isinstance(v, float): return "number"
     if isinstance(v, str): return "string"
     if isinstance(v, list): return "array"
