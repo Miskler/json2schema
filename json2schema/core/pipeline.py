@@ -1,5 +1,5 @@
 # pipeline.py
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Literal
 from .comparators.template import Resource, Comparator, ProcessingContext, ToDelete
 from .pseudo_arrays import PseudoArrayHandlerBase
 import logging
@@ -9,12 +9,15 @@ logger = logging.getLogger(__name__)
 
 
 class Converter:
-    def __init__(self, pseudo_handler: Optional[PseudoArrayHandlerBase] = None):
+    def __init__(self,
+                 pseudo_handler: Optional[PseudoArrayHandlerBase] = None,
+                 base_of: Literal["anyOf", "oneOf", "allOf"] = "anyOf"):
         self._schemas: List[Resource] = []
         self._jsons: List[Resource] = []
         self._comparators: List[Comparator] = []
         self._id = 0
         self._pseudo_handler = pseudo_handler
+        self._base_of = base_of
 
     def add_schema(self, s: dict):
         self._schemas.append(Resource(str(self._id), "schema", s))
@@ -123,7 +126,7 @@ class Converter:
             if g:
                 node.update(g)
             if alts:
-                node.setdefault("anyOf", []).extend(alts)
+                node.setdefault(self._base_of, []).extend(alts)
         
         to_delete_keys = []
         for key, element in node.items():
@@ -132,16 +135,16 @@ class Converter:
         for key in to_delete_keys:
             del node[key]
 
-        # если есть anyOf — обработаем каждую альтернативу через _run_level
-        if "anyOf" in node:
-            new_anyof = []
-            for idx, alt in enumerate(node["anyOf"]):
+        # если есть Of — обработаем каждую альтернативу через _run_level
+        if self._base_of in node:
+            new_of = []
+            for idx, alt in enumerate(node[self._base_of]):
                 alt_ids = set(alt.get("j2sElementTrigger", []))
                 alt_ctx = self._filter_ctx_by_ids(ctx, alt_ids) if alt_ids else ctx
-                processed_alt = self._run_level(alt_ctx, env + f"/anyOf/{idx}", alt)
-                new_anyof.append(processed_alt)
-            node["anyOf"] = new_anyof
-            logger.debug("Exiting _run_level (anyOf handled): env=%s, node=%s", env, node)
+                processed_alt = self._run_level(alt_ctx, env + f"/{self._base_of}/{idx}", alt)
+                new_of.append(processed_alt)
+            node[self._base_of] = new_of
+            logger.debug("Exiting _run_level (%s handled): env=%s, node=%s", self._base_of, env, node)
             return node
 
         # recursion based on type

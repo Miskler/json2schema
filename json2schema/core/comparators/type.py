@@ -41,7 +41,7 @@ class TypeComparator(Comparator):
         if not type_map: return None, None
         variants = [{"type": t, "j2sElementTrigger": sorted(list(ids))} for t, ids in type_map.items()]
         if ctx.sealed:
-            # cannot create anyOf inside sealed context — choose first deterministic
+            # cannot create Of inside sealed context — choose first deterministic
             return variants[0], None
         if len(variants) == 1:
             return variants[0], None
