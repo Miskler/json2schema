@@ -6,18 +6,22 @@
 
 *A powerful, intelligent library for generating JSON Schema from multiple JSON instances with **smart merging**, **advanced inference**, and **modular refinements**.*
 
-[![Tests](https://img.shields.io/badge/tests-passing-brightgreen)](https://github.com/Miskler/json2schema/actions)
-[![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)](https://github.com/Miskler/json2schema)
+[![Tests](https://miskler.github.io/json2schema/tests-badge.svg)](https://miskler.github.io/json2schema/tests/tests-report.html)
+[![Coverage](https://miskler.github.io/json2schema/coverage.svg)](https://miskler.github.io/json2schema/coverage/)
 [![Python](https://img.shields.io/badge/python-3.10+-blue)](https://python.org)
 [![PyPI - Package Version](https://img.shields.io/pypi/v/json2schema?color=blue)](https://pypi.org/project/json2schema/)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![License](https://img.shields.io/github/license/Miskler/json2schema.svg)](https://github.com/Miskler/json2schema?tab=AGPL-3.0-1-ov-file)
 [![BlackCode](https://img.shields.io/badge/code%20style-black-black)](https://github.com/psf/black)
 [![mypy](https://img.shields.io/badge/type--checked-mypy-blue?logo=python)](https://mypy.readthedocs.io/en/stable/index.html)
 
 **[⭐ Star us on GitHub](https://github.com/Miskler/json2schema)** | **[📚 Read the Docs](https://miskler.github.io/json2schema/)** | **[🐛 Report Bug](https://github.com/Miskler/json2schema/issues)**
 </div>
 
+<div align="center">
+
 ## ✨ Features
+
+</div>
 
 - 🎯 **Intelligent Merging** – Combines multiple JSON instances into a single schema
 - 🔗 **Configurable Combinators** – Use `anyOf` or `oneOf` for conflicting types/properties
