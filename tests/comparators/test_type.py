@@ -1,7 +1,7 @@
 import unittest
 
-from json2schema2schema.comparators.template import ProcessingContext, Resource
-from json2schema2schema.comparators.type import TypeComparator, infer_json_type, infer_schema_type
+from genschema.comparators.template import ProcessingContext, Resource
+from genschema.comparators.type import TypeComparator, infer_json_type, infer_schema_type
 
 
 class TestInferJsonType(unittest.TestCase):

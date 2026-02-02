@@ -9,8 +9,8 @@ Basic usage example:
 
 .. code-block:: python
 
-    from json2schema2schema import Converter, PseudoArrayHandler
-    from json2schema2schema.comparators import (
+    from genschema import Converter, PseudoArrayHandler
+    from genschema.comparators import (
         FormatComparator,
         RequiredComparator,
         EmptyComparator,
@@ -77,5 +77,5 @@ Basic usage example:
 See also
 --------
 
-- :mod:`json2schema2schema.pipeline` — detailed documentation of the internal pipeline and comparator system
-- :class:`json2schema2schema.pseudo_arrays` — pseudo-array detection and normalization logic
+- :mod:`genschema.pipeline` — detailed documentation of the internal pipeline and comparator system
+- :class:`genschema.pseudo_arrays` — pseudo-array detection and normalization logic

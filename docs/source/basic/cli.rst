@@ -1,7 +1,7 @@
-json2schema CLI Tool
+genschema CLI Tool
 ====================
 
-**json2schema** is a command-line utility that generates JSON Schema from one or more JSON documents.  
+**genschema** is a command-line utility that generates JSON Schema from one or more JSON documents.  
 It supports multiple input files, stdin input, smart type merging with ``anyOf``/``oneOf``, pseudo-array detection, and several optional schema refinement comparators.
 
 Features
@@ -23,7 +23,7 @@ Usage
 
 .. code-block:: text
 
-   json2schema2schema [OPTIONS] [INPUTS]...
+   genschema [OPTIONS] [INPUTS]...
 
 Arguments
 ~~~~~~~~~
@@ -67,41 +67,41 @@ Read single file and write schema to disk
 
 .. code-block:: bash
 
-   json2schema2schema data.json -o schema.json
+   genschema data.json -o schema.json
 
 Multiple files → anyOf combination
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-   json2schema2schema user1.json user2.json user3.json --base-of anyOf -o schema.json
+   genschema user1.json user2.json user3.json --base-of anyOf -o schema.json
 
 Read from stdin
 ~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-   cat record.json | json2schema2schema -
+   cat record.json | genschema -
 
    # or with redirection
-   json2schema2schema - < record.json
+   genschema - < record.json
 
    # piping from another command
-   curl https://api.example.com/data | json2schema2schema -o api-schema.json
+   curl https://api.example.com/data | genschema -o api-schema.json
 
 Use oneOf instead of anyOf
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-   json2schema2schema event-log-*.json --base-of oneOf -o events.schema.json
+   genschema event-log-*.json --base-of oneOf -o events.schema.json
 
 Disable most refinements (minimal schema)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-   json2schema2schema messy-data.json --no-format --no-required --no-empty --no-pseudo-array -o minimal.json
+   genschema messy-data.json --no-format --no-required --no-empty --no-pseudo-array -o minimal.json
 
 Exit Codes
 ----------
@@ -132,4 +132,4 @@ The tool is built around a modular ``Converter`` class that:
 
 Comparators can be selectively disabled via CLI flags.
 
-See also for more: :mod:`json2schema2schema.cli`
+See also for more: :mod:`genschema.cli`

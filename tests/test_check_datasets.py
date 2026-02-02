@@ -6,8 +6,8 @@ import pytest
 from jsonschema import validate
 from jsonschema.validators import Draft202012Validator
 
-from json2schema2schema import Converter, PseudoArrayHandler
-from json2schema2schema.comparators import (
+from genschema import Converter, PseudoArrayHandler
+from genschema.comparators import (
     DeleteElement,
     EmptyComparator,
     FormatComparator,

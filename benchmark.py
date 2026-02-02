@@ -1,9 +1,9 @@
 import time
 from statistics import mean
 
-# ===== json2schema (твоя библиотека) =====
-from json2schema2schema.pipeline import Converter
-from json2schema2schema.comparators import (
+# ===== genschema (твоя библиотека) =====
+from genschema.pipeline import Converter
+from genschema.comparators import (
     FormatComparator,
     RequiredComparator,
     EmptyComparator,
@@ -28,8 +28,8 @@ JSONS = [
 RUNS = 5000
 
 
-# ===== json2schema прогон =====
-def run_json2schema():
+# ===== genschema прогон =====
+def run_genschema():
     conv = Converter()
     conv.add_schema(SCHEMA)
 
@@ -71,18 +71,18 @@ def benchmark(fn, runs):
 if __name__ == "__main__":
     print(f"Прогонов: {RUNS}\n")
 
-    t1 = benchmark(run_json2schema, RUNS)
+    t1 = benchmark(run_genschema, RUNS)
     t2 = benchmark(run_genson, RUNS)
 
-    avg_json2schema = mean(t1)
+    avg_genschema = mean(t1)
     avg_genson = mean(t2)
 
     print("=== РЕЗУЛЬТАТЫ ===")
-    print(f"json2schema : {avg_json2schema:.6f} сек (avg)")
+    print(f"genschema : {avg_genschema:.6f} сек (avg)")
     print(f"genson      : {avg_genson:.6f} сек (avg)")
 
     if avg_genson > 0:
-        print(f"\njson2schema / genson = {avg_json2schema / avg_genson:.2f}x")
+        print(f"\ngenschema / genson = {avg_genschema / avg_genson:.2f}x")
     
     print("\n")
     from jsonschema_diff import JsonSchemaDiff, ConfigMaker
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     )
 
     #prop.compare( # Function accepts both file path and schema dict itself // can be combined
-    #    old_schema=run_json2schema(),
+    #    old_schema=run_genschema(),
     #    new_schema=run_genson()
     #)
 

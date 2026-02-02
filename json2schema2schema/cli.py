@@ -18,15 +18,15 @@ console = Console()
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate JSON Schema from JSON input using json2schema.",
+        description="Generate JSON Schema from JSON input using genschema.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  json2schema input.json -o schema.json
-  json2schema input1.json input2.json --base-of oneOf
-  cat input.json | json2schema -
-  json2schema --base-of anyOf < input.json
-  json2schema dir/file1.json dir/file2.json -o schema.json
+  genschema input.json -o schema.json
+  genschema input1.json input2.json --base-of oneOf
+  cat input.json | genschema -
+  genschema --base-of anyOf < input.json
+  genschema dir/file1.json dir/file2.json -o schema.json
         """,
     )
     parser.add_argument(

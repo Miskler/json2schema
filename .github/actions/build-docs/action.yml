@@ -1,5 +1,5 @@
 name: 'Build Documentation'
-description: 'Build all documentation (main + examples) for json2schema'
+description: 'Build all documentation (main + examples) for genschema'
 outputs:
   site-path:
     description: 'Path to the built site'
