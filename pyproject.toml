@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "json2schema"
 dynamic = ["version"]
-description = "A library for comparing JSON schemas and displaying differences"
+description = "A library for comparing JSON and schemas and generate new"
 authors = [
     {name = "Miskler", email = "mail@miskler.ru"}
 ]

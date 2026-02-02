@@ -62,8 +62,7 @@ class TypeComparator(Comparator):
             return None, None
 
         variants: list[dict[str, Any]] = [
-            {"type": t, "j2sElementTrigger": sorted(ids)}
-            for t, ids in type_map.items()
+            {"type": t, "j2sElementTrigger": sorted(ids)} for t, ids in type_map.items()
         ]
 
         if ctx.sealed:

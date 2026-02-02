@@ -4,6 +4,7 @@ black
 isort
 mypy
 flake8
+jsonschema
 
 sphinx
 sphinx-autoapi

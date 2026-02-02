@@ -22,7 +22,7 @@ class ProcessingContext:
     sealed: bool = False
 
 
-ComparatorResult = tuple[Optional[dict[str, ToDelete | Any]], Optional[list[dict]]]
+ComparatorResult = tuple[Optional[dict[str, ToDelete | Any | bool]], Optional[list[dict]]]
 
 
 class Comparator:
