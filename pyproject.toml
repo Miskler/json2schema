@@ -25,7 +25,10 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Utilities",
 ]
-keywords = ["json", "schema", "diff", "comparison"]
+keywords = ["json", "schema", "diff", "generation"]
+dependencies = [
+    "rich",
+]
 
 [project.optional-dependencies]
 dev = [
